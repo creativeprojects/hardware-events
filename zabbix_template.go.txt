@@ -1,0 +1,34 @@
+- disk.pools "[
+{{- $first := true -}}
+{{- range .DiskPools -}}
+    {{- if $first -}}
+        {{- $first = false -}}
+    {{- else -}}
+        ,
+    {{- end -}}
+    {\"{#POOL_NAME}\":\"{{- .Name -}}\"}
+{{- end -}}
+]"
+- disk.names "[
+{{- $first := true -}}
+{{- range .Disks -}}
+    {{- if $first -}}
+        {{- $first = false -}}
+    {{- else -}}
+        ,
+    {{- end -}}
+    {\"{#DISK_NAME}\":\"{{- .Name -}}\"}
+{{- end -}}
+]"
+{{- range .DiskPools }}
+- disks.active[{{- .Name -}}] "{{- .CountActive -}}"
+{{- end -}}
+{{ range .Disks -}}
+{{- if .HasTemperature }}
+{{- if .TemperatureAvailable }}
+- disks.temperature[{{- .Name -}}] "{{ .Temperature }}"
+{{- else if not .IsActive }}
+- disks.temperature[{{- .Name -}}] "0"
+{{- end -}}
+{{- end -}}
+{{- end -}}

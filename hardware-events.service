@@ -1,0 +1,12 @@
+[Unit]
+Description=Hardware Events Dispatcher
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/hardware-events/
+ExecStart=/opt/hardware-events/hardware-events
+WatchdogSec=900s
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
