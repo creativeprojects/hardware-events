@@ -8,10 +8,13 @@ This project:
 * reads temperature from various sensors (CPU, motherboard, disks)
 * sets FAN speed via the command line like `ipmitool` (multi-zones)
 * sends sensor and FAN data to a monitoring platform (zabbix)
+* suspends hard drive when there's no activity (while still being able to read the temperature before suspending)
 
 I have it running on various Supermicro server boards (X9/X10/X11) and manage the different FAN zones separately.
 
-Everything is in the configuration file:
+## Configuration
+
+Everything is in the configuration file. This configuration is Linux based. The project probably works on FreeBSD (although not tested) but you might need to change the sensor settings (I'm using linux `sysfs`):
 
 ```yaml
 ---
@@ -196,3 +199,7 @@ schedule:
     - startup
     - every 5m
 ```
+
+# External resources
+
+* This is where I found out I could control the FAN myself: https://forums.servethehome.com/index.php?resources/supermicro-x9-x10-x11-fan-speed-control.20/
