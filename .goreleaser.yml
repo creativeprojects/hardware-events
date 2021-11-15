@@ -1,0 +1,72 @@
+project_name: hardware-events
+
+builds:
+  - id: resticprofile_targz
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - freebsd
+      - linux
+    goarch:
+      - 386
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+    ignore:
+      - goos: freebsd
+        goarch: arm64
+
+archives:
+  - id: targz
+    builds:
+    - resticprofile_targz
+    format: tar.gz
+    
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+nfpms:
+  -
+    package_name: hardware-events
+    vendor: "creativeprojects"
+    homepage: "https://github.com/creativeprojects"
+    maintainer: "fred@creativeprojects.tech"
+    description: "Monitor Hardware Events"
+    file_name_template: "{{.ProjectName}}_{{.Version}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      linux: Linux
+    formats:
+      - apk
+      - deb
+      - rpm
+    bindir: /opt/hardware-events
+    contents:
+      - src: hardware-events.service
+        dst: /etc/systemd/system/hardware-events.service
+        type: config
+      - src: config.yaml
+        dst: /opt/hardware-events/config.yaml
+        type: config|noreplace
+      - src: zabbix_template.go.txt
+        dst: /opt/hardware-events/zabbix_template.go.txt
+        type: config|noreplace
+    scripts:
+      postinstall: "scripts/postinstall.sh"
+      postremove: "scripts/postremove.sh"

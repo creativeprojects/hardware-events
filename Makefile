@@ -10,6 +10,7 @@ GOTEST=$(GOCMD) test
 GOTOOL=$(GOCMD) tool
 GOGET=$(GOCMD) get
 GOPATH?=`$(GOCMD) env GOPATH`
+GOBIN=$(GOPATH)/bin
 
 CONFIG=config-local.yaml
 TEMPLATES=*.go.txt
@@ -21,7 +22,7 @@ DEPLOY=~/hardware-events
 BUILD_DATE=`date`
 BUILD_COMMIT=`git rev-parse HEAD`
 
-.PHONY: all test build coverage clean deploy
+.PHONY: all test build coverage clean deploy release-snapshot goreleaser
 
 all: test build
 
@@ -46,3 +47,10 @@ deploy: $(CONFIG) build
 deploy-%: build config-%.yaml
 		@echo Deploying $*...
 		rsync -avz $(BINARY) config-$*.yaml $(TEMPLATES) hardware-events.service $*:$(DEPLOY)/
+
+goreleaser:
+		go install github.com/goreleaser/goreleaser@latest
+
+release-snapshot: goreleaser
+		PATH=$(PATH):$(GOBIN) goreleaser check --config .goreleaser.yml
+		PATH=$(PATH):$(GOBIN) goreleaser release --snapshot --config .goreleaser.yml --rm-dist
