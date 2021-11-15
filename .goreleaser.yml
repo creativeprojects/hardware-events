@@ -45,7 +45,6 @@ nfpms:
     homepage: "https://github.com/creativeprojects"
     maintainer: "fred@creativeprojects.tech"
     description: "Monitor Hardware Events"
-    file_name_template: "{{.ProjectName}}_{{.Version}}-{{.Arch}}"
     replacements:
       amd64: 64bit
       386: 32bit
