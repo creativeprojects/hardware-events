@@ -5,48 +5,48 @@ import (
 	"time"
 )
 
-type IntValue struct {
+type CacheValue[T comparable] struct {
 	mutex    sync.Mutex
-	value    int
+	value    T
 	last     time.Time
 	validity time.Duration
 }
 
-func NewIntValue(validity time.Duration) *IntValue {
+func NewCacheValue[T comparable](validity time.Duration) *CacheValue[T] {
 	if validity == 0 {
 		validity = 1 * time.Minute
 	}
-	return &IntValue{
+	return &CacheValue[T]{
 		mutex:    sync.Mutex{},
 		validity: validity,
 	}
 }
 
-func (v *IntValue) HasValue() bool {
+func (v *CacheValue[T]) HasValue() bool {
 	v.mutex.Lock()
 	defer v.mutex.Unlock()
 
 	return v.hasValue()
 }
 
-func (v *IntValue) Set(value int) {
+func (v *CacheValue[T]) Set(value T) {
 	v.mutex.Lock()
 	defer v.mutex.Unlock()
 
 	v.set(value)
 }
 
-func (v *IntValue) GetCached() (int, bool) {
+func (v *CacheValue[T]) GetCached() (T, bool) {
 	v.mutex.Lock()
 	defer v.mutex.Unlock()
 
 	if !v.hasValue() {
-		return 0, false
+		return *new(T), false
 	}
 	return v.value, true
 }
 
-func (v *IntValue) Get(origin func() (int, error)) (int, error) {
+func (v *CacheValue[T]) Get(origin func() (T, error)) (T, error) {
 	v.mutex.Lock()
 	defer v.mutex.Unlock()
 
@@ -55,20 +55,20 @@ func (v *IntValue) Get(origin func() (int, error)) (int, error) {
 	}
 	value, err := origin()
 	if err != nil {
-		return 0, err
+		return *new(T), err
 	}
 	v.set(value)
 	return v.value, nil
 }
 
-func (v *IntValue) hasValue() bool {
+func (v *CacheValue[T]) hasValue() bool {
 	if v.last.IsZero() {
 		return false
 	}
 	return v.last.Add(v.validity).After(time.Now())
 }
 
-func (v *IntValue) set(value int) {
+func (v *CacheValue[T]) set(value T) {
 	v.last = time.Now()
 	v.value = value
 }

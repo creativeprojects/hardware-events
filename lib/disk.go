@@ -18,8 +18,8 @@ type Disk struct {
 	config            cfg.Disk
 	Name              string
 	Device            string
-	active            *cache.IntValue
-	temperature       *cache.IntValue
+	active            *cache.CacheValue[int]
+	temperature       *cache.CacheValue[int]
 	lastActivity      time.Time
 	activityMutex     sync.Mutex
 	stats             *Diskstats
@@ -71,8 +71,8 @@ func NewDisk(global *Global, name string, config cfg.Disk, diskStatusCommand Dis
 		config:            config,
 		Name:              name,
 		Device:            device,
-		active:            cache.NewIntValue(1 * time.Minute),
-		temperature:       cache.NewIntValue(1 * time.Minute),
+		active:            cache.NewCacheValue[int](1 * time.Minute),
+		temperature:       cache.NewCacheValue[int](1 * time.Minute),
 		idleAfter:         idleAfter,
 		standbyAfter:      standbyAfter,
 		diskStatusCommand: diskStatusCommand,
