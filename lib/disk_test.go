@@ -13,7 +13,7 @@ import (
 
 func TestDiskDevice(t *testing.T) {
 	// test that a full path can be resolved into a 3 letters device (sda)
-	const diskByIdPath = "drivetemp_test_files/dev/disk/by-id/"
+	const diskByIdPath = "fs_test_files/dev/disk/by-id/"
 	entries, err := os.ReadDir(diskByIdPath)
 	require.NoError(t, err)
 

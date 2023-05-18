@@ -10,18 +10,19 @@ import (
 
 // Config from the file
 type Config struct {
-	Simulation      bool                `yaml:"simulation"`
-	DiskPowerStatus DiskPowerStatus     `yaml:"disk_power_status"`
-	Sensors         map[string]Task     `yaml:"sensors"`
-	DiskPools       map[string][]string `yaml:"disk_pools"`
-	Disks           map[string]Disk     `yaml:"disks"`
-	Templates       map[string]Template `yaml:"templates"`
-	Tasks           map[string]Task     `yaml:"tasks"`
-	Schedule        map[string]Schedule `yaml:"schedule"`
-	FanControl      FanControl          `yaml:"fan_control"`
+	Simulation      bool                       `yaml:"simulation"`
+	DiskPowerStatus map[string]DiskPowerStatus `yaml:"disk_power_status"`
+	Sensors         map[string]Task            `yaml:"sensors"`
+	DiskPools       map[string][]string        `yaml:"disk_pools"`
+	Disks           map[string]Disk            `yaml:"disks"`
+	Templates       map[string]Template        `yaml:"templates"`
+	Tasks           map[string]Task            `yaml:"tasks"`
+	Schedule        map[string]Schedule        `yaml:"schedule"`
+	FanControl      FanControl                 `yaml:"fan_control"`
 }
 
 type DiskPowerStatus struct {
+	File           string `yaml:"file"`
 	CheckCommand   string `yaml:"check_command"`
 	Active         string `yaml:"active"`
 	Standby        string `yaml:"standby"`
@@ -37,6 +38,7 @@ type Disk struct {
 	MonitorTemperature string `yaml:"monitor_temperature"`
 	LastActive         string `yaml:"last_active"`
 	StandbyAfter       string `yaml:"standby_after"`
+	PowerStatus        string `yaml:"power_status"`
 }
 
 type Template struct {

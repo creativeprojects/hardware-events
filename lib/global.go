@@ -19,7 +19,7 @@ type Global struct {
 	Templates          map[string]*Template
 	Tasks              map[string]*Task
 	Schedules          map[string]*Schedule
-	DiskStatus         DiskStatuser
+	DiskStatuses       map[string]DiskStatuser
 	TemperatureSensors map[string]SensorGetter
 	FanControl         *Control
 	templ              *template.Template
@@ -37,6 +37,7 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 		Tasks:              make(map[string]*Task, len(config.Tasks)),
 		TemperatureSensors: make(map[string]SensorGetter, len(config.Sensors)),
 		Schedules:          make(map[string]*Schedule, len(config.Schedule)),
+		DiskStatuses:       make(map[string]DiskStatuser, len(config.DiskPowerStatus)),
 		diskstatsMutex:     sync.Mutex{},
 	}
 
@@ -46,24 +47,26 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 	}
 
 	// Disk Power Status
-	if config.DiskPowerStatus.CheckCommand != "" {
+	for name, value := range config.DiskPowerStatus {
 		var diskStatus DiskStatuser
 		if config.Simulation {
-			diskStatus, err = simulation.NewDiskStatus(config.DiskPowerStatus)
+			diskStatus, err = simulation.NewDiskStatus(name, value)
 		} else {
-			diskStatus, err = NewDiskStatus(config.DiskPowerStatus)
+			diskStatus, err = NewDiskStatus(name, value)
 		}
 		if err != nil {
 			return global, err
 		}
-		global.DiskStatus = diskStatus
+		global.DiskStatuses[name] = diskStatus
 	}
 
 	// Disks
 	for name, value := range config.Disks {
-		disk, err := NewDisk(global, name, value, global.DiskStatus)
+		disk, err := NewDisk(global, name, value, global.DiskStatuses)
 		if err != nil {
-			return global, err
+			// display an error but keep going
+			clog.Errorf("ignoring configuration for disk %q: %s", name, err)
+			continue
 		}
 		global.Disks[name] = disk
 	}

@@ -11,14 +11,16 @@ import (
 
 type DiskStatus struct {
 	status         map[string]enum.DiskStatus
+	name           string
 	checkCommand   string
 	standbyCommand string
 	mutex          sync.Mutex
 }
 
-func NewDiskStatus(config cfg.DiskPowerStatus) (*DiskStatus, error) {
+func NewDiskStatus(name string, config cfg.DiskPowerStatus) (*DiskStatus, error) {
 	return &DiskStatus{
 		status:         make(map[string]enum.DiskStatus),
+		name:           name,
 		checkCommand:   config.CheckCommand,
 		standbyCommand: config.StandbyCommand,
 		mutex:          sync.Mutex{},

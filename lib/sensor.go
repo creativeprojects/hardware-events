@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -167,17 +166,11 @@ func (s *Sensor) getRaw(expandEnv func(string) string) ([]string, error) {
 }
 
 func (s *Sensor) readFile(filename string) (string, error) {
-	// to use fs.Open we need to strip the first "/" from the path. let's leave it for now
-	// file, err := s.fs.Open(filename)
-	file, err := os.Open(filename)
+	// to use fs.Readfile we need to strip the first "/" from the path. let's leave it for now
+	// file, err := fs.ReadFile(s.fs, filename)
+	output, err := os.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
-	buffer := &bytes.Buffer{}
-	_, err = buffer.ReadFrom(file)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(buffer.String()), nil
+	return strings.TrimSpace(string(output)), nil
 }

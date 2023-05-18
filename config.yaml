@@ -16,8 +16,11 @@ sensors:
   pch:
     file: "/sys/class/thermal/thermal_zone1/temp"
     divider: 1000
-  drivetemp:
+  satatemp:
     file: "/sys/block/${DEVICE_NAME}/device/hwmon/hwmon*/temp1_input"
+    divider: 1000
+  nvmetemp:
+    file: "/sys/block/${DEVICE_NAME}/device/hwmon*/temp1_input"
     divider: 1000
 
 fan_control:
@@ -111,12 +114,13 @@ fan_control:
               to: 100
 
 disk_power_status:
-  check_command: "/sbin/hdparm -C ${DEVICE}"
-  active: "active/idle"
-  standby: "standby"
-  sleeping: "sleeping"
-  standby_command: "/sbin/hdparm -y ${DEVICE}"
-  timeout: 5s
+  hdparm:
+    check_command: "/sbin/hdparm -C ${DEVICE}"
+    active: "active/idle"
+    standby: "standby"
+    sleeping: "sleeping"
+    standby_command: "/sbin/hdparm -y ${DEVICE}"
+    timeout: 5s
 
 disk_pools:
   rpool:
@@ -131,33 +135,33 @@ disk_pools:
 disks:
   rpool1:
     device: "/dev/disk/by-id/ata-SAMSUNG_SSD_first"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: always
   rpool2:
     device: "/dev/disk/by-id/ata-SAMSUNG_SSD_second"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: always
   datapool1:
     device: "/dev/disk/by-id/ata-ST2000DM001-first"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: when_active
     last_active: 50m
     standby_after: 1h
   datapool2:
     device: "/dev/disk/by-id/ata-ST2000DM001-second"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: when_active
     last_active: 50m
     standby_after: 1h
   datapool3:
     device: "/dev/disk/by-id/ata-ST2000DM001-third"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: when_active
     last_active: 50m
     standby_after: 1h
   datapool4:
     device: "/dev/disk/by-id/ata-ST2000DM001-fourth"
-    temperature_sensor: drivetemp
+    temperature_sensor: satatemp
     monitor_temperature: when_active
     last_active: 50m
     standby_after: 1h

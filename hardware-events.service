@@ -1,5 +1,6 @@
 [Unit]
 Description=Hardware Events Dispatcher
+After=network.target
 
 [Service]
 Type=notify

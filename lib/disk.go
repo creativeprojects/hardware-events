@@ -14,26 +14,41 @@ import (
 
 // Disk activity and status
 type Disk struct {
-	global            *Global
-	config            cfg.Disk
-	Name              string
-	Device            string
-	active            *cache.CacheValue[int]
-	temperature       *cache.CacheValue[int]
-	lastActivity      time.Time
-	activityMutex     sync.Mutex
-	stats             *Diskstats
-	idleAfter         time.Duration
-	standbyAfter      time.Duration
-	diskStatusCommand DiskStatuser
+	global        *Global
+	config        cfg.Disk
+	Name          string
+	Device        string
+	active        *cache.CacheValue[int]
+	temperature   *cache.CacheValue[int]
+	lastActivity  time.Time
+	activityMutex sync.Mutex
+	stats         *Diskstats
+	idleAfter     time.Duration
+	standbyAfter  time.Duration
+	diskStatus    DiskStatuser
 }
 
 // NewDisk creates a new disk activity and status monitor
-func NewDisk(global *Global, name string, config cfg.Disk, diskStatusCommand DiskStatuser) (*Disk, error) {
+func NewDisk(global *Global, name string, config cfg.Disk, diskStatuses map[string]DiskStatuser) (*Disk, error) {
 	device := config.Device
 	fi, err := os.Lstat(device)
 	if err != nil {
 		return nil, err
+	}
+
+	var diskStatus DiskStatuser
+	if config.PowerStatus != "" {
+		diskStatus = diskStatuses[config.PowerStatus]
+	}
+	if diskStatus == nil && len(diskStatuses) == 1 {
+		// load the only one instead
+		for _, value := range diskStatuses {
+			diskStatus = value
+			break
+		}
+	}
+	if diskStatus == nil {
+		clog.Warningf("disk %q has no power status available", name)
 	}
 
 	if fi.Mode()&os.ModeSymlink != 0 {
@@ -67,27 +82,27 @@ func NewDisk(global *Global, name string, config cfg.Disk, diskStatusCommand Dis
 
 	clog.Debugf("device %s: %s", name, device)
 	return &Disk{
-		global:            global,
-		config:            config,
-		Name:              name,
-		Device:            device,
-		active:            cache.NewCacheValue[int](1 * time.Minute),
-		temperature:       cache.NewCacheValue[int](1 * time.Minute),
-		idleAfter:         idleAfter,
-		standbyAfter:      standbyAfter,
-		diskStatusCommand: diskStatusCommand,
-		activityMutex:     sync.Mutex{},
+		global:        global,
+		config:        config,
+		Name:          name,
+		Device:        device,
+		active:        cache.NewCacheValue[int](1 * time.Minute),
+		temperature:   cache.NewCacheValue[int](1 * time.Minute),
+		idleAfter:     idleAfter,
+		standbyAfter:  standbyAfter,
+		diskStatus:    diskStatus,
+		activityMutex: sync.Mutex{},
 	}, nil
 }
 
 // IsActive returns true when the disk is not in standby or sleep mode
 func (d *Disk) IsActive() bool {
-	if d.diskStatusCommand == nil {
+	if d.diskStatus == nil {
 		// shouldn't happen?
 		return false
 	}
 	output, err := d.active.Get(func() (int, error) {
-		return int(d.diskStatusCommand.Get(d.expandEnv)), nil
+		return int(d.diskStatus.Get(d.expandEnv)), nil
 	})
 	if err != nil {
 		return false
@@ -191,7 +206,7 @@ func (d *Disk) StartStandbyWatch() {
 			if d.IsActive() {
 				if d.LastActivity().Add(d.standbyAfter).Before(time.Now()) {
 					// time to put the disk to sleep
-					d.diskStatusCommand.Standby(d.expandEnv)
+					d.diskStatus.Standby(d.expandEnv)
 					d.active.Set(int(enum.DiskStatusActive))
 				}
 			}
