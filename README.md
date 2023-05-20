@@ -130,12 +130,13 @@ fan_control:
               to: 100
 
 disk_power_status:
-  check_command: "/sbin/hdparm -C ${DEVICE}"
-  active: "active/idle"
-  standby: "standby"
-  sleeping: "sleeping"
-  standby_command: "/sbin/hdparm -y ${DEVICE}"
-  timeout: 5s
+  hdparm:
+    check_command: "/sbin/hdparm -C ${DEVICE}"
+    active: "active/idle"
+    standby: "standby"
+    sleeping: "sleeping"
+    standby_command: "/sbin/hdparm -y ${DEVICE}"
+    timeout: 5s
 
 disk_pools:
   rpool:
