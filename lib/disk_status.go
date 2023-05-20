@@ -31,7 +31,7 @@ type DiskStatus struct {
 
 func NewDiskStatus(name string, config cfg.DiskPowerStatus) (*DiskStatus, error) {
 	var timeout time.Duration
-	var checkCommand, standbyCommand *Command
+	var checkCommand, standbyCommand CommandRunner
 	var err error
 
 	if config.Timeout != "" {
@@ -78,8 +78,7 @@ func (s *DiskStatus) Get(expandEnv func(string) string) enum.DiskStatus {
 		return enum.DiskStatusUnknown
 	}
 
-	// we check that the interface value is not nil, then that the implementation value is not nil
-	if s.checkCommand != nil && s.checkCommand.(*Command) != nil {
+	if s.checkCommand != nil {
 		output, err = s.checkCommand.Run(nil, expandEnv)
 		if err != nil {
 			return enum.DiskStatusUnknown
@@ -120,8 +119,7 @@ func (s *DiskStatus) Standby(expandEnv func(string) string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	// we check that the interface value is nil, or that the implementation value is nil
-	if s.standbyCommand == nil || s.standbyCommand.(*Command) == nil {
+	if s.standbyCommand == nil {
 		return errors.New("no command defined to put the disk in standby mode")
 	}
 	_, err := s.standbyCommand.Run(nil, expandEnv)
