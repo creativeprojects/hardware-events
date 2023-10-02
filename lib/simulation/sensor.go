@@ -12,19 +12,21 @@ import (
 
 // Sensor simulates a hardware sensor
 type Sensor struct {
-	config cfg.Task
-	mutex  sync.Mutex
-	values map[string]float64
-	Name   string
+	config        cfg.Task
+	mutex         sync.Mutex
+	values        map[string]float64
+	randGenerator *rand.Rand
+	Name          string
 }
 
 // NewSensor creates a new simulated sensor
-func NewSensor(name string, config cfg.Task) (*Sensor, error) {
+func NewSensor(name string, config cfg.Task, randGenerator *rand.Rand) (*Sensor, error) {
 	return &Sensor{
-		config: config,
-		mutex:  sync.Mutex{},
-		values: make(map[string]float64),
-		Name:   name,
+		config:        config,
+		mutex:         sync.Mutex{},
+		values:        make(map[string]float64),
+		randGenerator: randGenerator,
+		Name:          name,
 	}, nil
 }
 
@@ -47,7 +49,7 @@ func (s *Sensor) Get(expandEnv func(string) string) (int, error) {
 		// but when it's above the middle, make it cool down faster
 		adjustMiddle = 6
 	}
-	value += rand.Float64()*10 - adjustMiddle
+	value += s.randGenerator.Float64()*10 - adjustMiddle
 	if value < constants.SimulationMinTemp {
 		value = constants.SimulationMinTemp
 	}

@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"math/rand"
 	"testing"
 
 	"github.com/creativeprojects/hardware-events/cfg"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestDefaultValues(t *testing.T) {
-	sensor, err := NewSensor("name", cfg.Task{})
+	sensor, err := NewSensor("name", cfg.Task{}, rand.New(rand.NewSource(1)))
 	require.NoError(t, err)
 
 	testData := []func(string) string{

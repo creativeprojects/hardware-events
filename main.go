@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/signal"
 	"runtime"
@@ -26,7 +25,7 @@ func main() {
 	var exitCode = 0
 	var err error
 
-	// trick to run all defer functions before returning with an exit code
+	// run all defer functions before returning with an exit code
 	defer func() {
 		if exitCode != 0 {
 			os.Exit(exitCode)
@@ -57,7 +56,7 @@ func main() {
 	}
 	if config.Simulation {
 		clog.Warningf("running in simulation mode with seed = %d", flags.seed)
-		rand.Seed(flags.seed)
+		config.Seed = flags.seed
 	}
 
 	global, err := lib.NewGlobal(config)

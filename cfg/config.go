@@ -11,6 +11,7 @@ import (
 // Config from the file
 type Config struct {
 	Simulation      bool                       `yaml:"simulation"`
+	Seed            int64                      `yaml:"simulation_seed"`
 	DiskPowerStatus map[string]DiskPowerStatus `yaml:"disk_power_status"`
 	Sensors         map[string]Task            `yaml:"sensors"`
 	DiskPools       map[string][]string        `yaml:"disk_pools"`
