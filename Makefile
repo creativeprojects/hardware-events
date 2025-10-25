@@ -27,7 +27,7 @@ BUILD_COMMIT=`git rev-parse HEAD`
 all: test build
 
 build:
-		$(GOBUILD) -race -o $(BINARY) -v -ldflags "-X 'main.commit=${BUILD_COMMIT}' -X 'main.date=${BUILD_DATE}' -X 'main.builtBy=make'"
+		GOAMD64='v3' $(GOBUILD) -o $(BINARY) -v -ldflags "-X 'main.commit=${BUILD_COMMIT}' -X 'main.date=${BUILD_DATE}' -X 'main.builtBy=make'"
 
 test:
 		$(GOTEST) -v -race $(TESTS)
