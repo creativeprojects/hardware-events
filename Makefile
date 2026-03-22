@@ -17,7 +17,7 @@ TEMPLATES=*.go.txt
 BINARY=hardware-events
 TESTS=./...
 COVERAGE_FILE=coverage.out
-DEPLOY=~/hardware-events
+DEPLOY=/opt/hardware-events
 
 BUILD_DATE=`date`
 BUILD_COMMIT=`git rev-parse HEAD`
