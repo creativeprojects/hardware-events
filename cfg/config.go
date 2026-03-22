@@ -40,6 +40,7 @@ type Disk struct {
 	LastActive         string `yaml:"last_active"`
 	StandbyAfter       string `yaml:"standby_after"`
 	PowerStatus        string `yaml:"power_status"`
+	CheckEvery         string `yaml:"check_every"`
 }
 
 type Template struct {

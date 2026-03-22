@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"sync"
@@ -25,6 +26,7 @@ type Disk struct {
 	stats         *Diskstats
 	idleAfter     time.Duration
 	standbyAfter  time.Duration
+	checkEvery    time.Duration
 	diskStatus    DiskStatuser
 }
 
@@ -80,6 +82,14 @@ func NewDisk(global *Global, name string, config cfg.Disk, diskStatuses map[stri
 		}
 	}
 
+	checkEvery := 5 * time.Minute
+	if config.CheckEvery != "" {
+		checkEvery, err = time.ParseDuration(config.CheckEvery)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	clog.Debugf("device %s: %s", name, device)
 	return &Disk{
 		global:        global,
@@ -91,6 +101,7 @@ func NewDisk(global *Global, name string, config cfg.Disk, diskStatuses map[stri
 		idleAfter:     idleAfter,
 		standbyAfter:  standbyAfter,
 		diskStatus:    diskStatus,
+		checkEvery:    checkEvery,
 		activityMutex: sync.Mutex{},
 	}, nil
 }
@@ -210,8 +221,10 @@ func (d *Disk) StartStandbyWatch() {
 					d.active.Set(int(enum.DiskStatusActive))
 				}
 			}
-			// default timer is set to 5 minutes
-			time.Sleep(5 * time.Minute)
+			// default timer is set to duration plus or minus 1 minute
+			duration := d.checkEvery + time.Duration((rand.IntN(120)-60))*time.Second
+			clog.Debugf("disk idle check for %s in %s", d.Device, duration)
+			time.Sleep(duration)
 		}
 	}()
 }
