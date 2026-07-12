@@ -19,9 +19,6 @@ Everything is in the configuration file. This configuration is Linux based. The 
 ```yaml
 ---
 sensors:
-  hddtemp:
-    command: "/usr/sbin/hddtemp -n ${DEVICE}"
-    timeout: 5s
   smartctl:
     command: "/usr/sbin/smartctl -l scttempsts ${DEVICE}"
     regexp: "Current Temperature:\\s+(\\d+) Celsius"
