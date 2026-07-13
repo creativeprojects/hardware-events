@@ -2,8 +2,8 @@ package lib
 
 import (
 	"context"
-	"fmt"
 
+	"go.opentelemetry.io/otel/attribute"
 	api "go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/metric"
 )
@@ -19,21 +19,15 @@ func NewTelemetry(global *Global, exporter metric.Reader) (*Telemetry, error) {
 
 	meter := provider.Meter(meterName)
 
-	for _, disk := range global.Disks {
-		if disk == nil {
-			continue
-		}
-		err := setupDisk(meter, disk)
+	err := setupDisks(meter, global.Disks)
+	if err != nil {
+		return nil, err
+	}
+
+	if global.FanControl != nil {
+		err := setupFanZones(meter, global.FanControl.Zones)
 		if err != nil {
 			return nil, err
-		}
-	}
-	if global.FanControl != nil {
-		for _, zone := range global.FanControl.Zones {
-			err := setupFanZone(meter, zone)
-			if err != nil {
-				return nil, err
-			}
 		}
 	}
 
@@ -46,33 +40,39 @@ func (t *Telemetry) Shutdown(ctx context.Context) error {
 	return t.provider.Shutdown(ctx)
 }
 
-func setupDisk(meter api.Meter, disk *Disk) error {
-	if disk.HasTemperature() {
-		name := fmt.Sprintf("disk_temperature_%s", disk.Name)
-		_, err := meter.Int64ObservableGauge(name,
-			api.WithDescription("Internal temperature sensor from device "+disk.Device),
-			api.WithUnit("degree Celsius"),
-			api.WithInt64Callback(func(ctx context.Context, fo api.Int64Observer) error {
-				if disk.TemperatureAvailable() {
-					fo.Observe(int64(disk.Temperature()))
+func setupDisks(meter api.Meter, disks map[string]*Disk) error {
+	_, err := meter.Int64ObservableGauge("disk_temperature",
+		api.WithDescription("Disk internal temperature sensor"),
+		api.WithUnit("degree Celsius"),
+		api.WithInt64Callback(func(ctx context.Context, fo api.Int64Observer) error {
+			for _, disk := range disks {
+				if disk == nil {
+					return nil
 				}
-				return nil
-			}),
-		)
-		if err != nil {
-			return err
-		}
+				if disk.TemperatureAvailable() {
+					fo.Observe(int64(disk.Temperature()), api.WithAttributeSet(attribute.NewSet(diskAttributes(disk)...)))
+				}
+			}
+			return nil
+		}),
+	)
+	if err != nil {
+		return err
 	}
 
-	name := fmt.Sprintf("disk_active_%s", disk.Name)
-	_, err := meter.Int64ObservableGauge(name,
-		api.WithDescription("Active device "+disk.Device+": 0 when inactive, 1 when active"),
+	_, err = meter.Int64ObservableGauge("disk_active",
+		api.WithDescription("Active device: 0 when inactive, 1 when active"),
 		api.WithInt64Callback(func(ctx context.Context, fo api.Int64Observer) error {
-			var value int64 = 0
-			if disk.IsActive() {
-				value = 1
+			for _, disk := range disks {
+				if disk == nil {
+					return nil
+				}
+				var value int64 = 0
+				if disk.IsActive() {
+					value = 1
+				}
+				fo.Observe(value, api.WithAttributeSet(attribute.NewSet(diskAttributes(disk)...)))
 			}
-			fo.Observe(value)
 			return nil
 		}),
 	)
@@ -82,13 +82,18 @@ func setupDisk(meter api.Meter, disk *Disk) error {
 	return nil
 }
 
-func setupFanZone(meter api.Meter, zone *Zone) error {
-	name := fmt.Sprintf("fan_speed_%s", zone.Name)
-	_, err := meter.Int64ObservableGauge(name,
-		api.WithDescription(fmt.Sprintf("Fan speed on zone %d", zone.ID)),
+func setupFanZones(meter api.Meter, zones map[string]*Zone) error {
+	_, err := meter.Int64ObservableGauge("fan_speed",
+		api.WithDescription("Fan speed from 0 to 100%"),
 		api.WithUnit("percent"),
 		api.WithInt64Callback(func(ctx context.Context, fo api.Int64Observer) error {
-			fo.Observe(int64(zone.CurrentSpeed()))
+			for _, zone := range zones {
+				attributes := []attribute.KeyValue{
+					{Key: "name", Value: attribute.StringValue(zone.Name)},
+					{Key: "id", Value: attribute.IntValue(zone.ID)},
+				}
+				fo.Observe(int64(zone.CurrentFanSpeed()), api.WithAttributeSet(attribute.NewSet(attributes...)))
+			}
 			return nil
 		}),
 	)
@@ -96,4 +101,12 @@ func setupFanZone(meter api.Meter, zone *Zone) error {
 		return err
 	}
 	return nil
+}
+
+func diskAttributes(disk *Disk) []attribute.KeyValue {
+	attributes := []attribute.KeyValue{
+		{Key: "name", Value: attribute.StringValue(disk.Name)},
+		{Key: "device", Value: attribute.StringValue(disk.Device)},
+	}
+	return attributes
 }
