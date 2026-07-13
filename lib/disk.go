@@ -19,6 +19,7 @@ type Disk struct {
 	config        cfg.Disk
 	Name          string
 	Device        string
+	Pool          string
 	active        *cache.CacheValue[int]
 	temperature   *cache.CacheValue[int]
 	lastActivity  time.Time

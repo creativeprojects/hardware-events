@@ -1,5 +1,7 @@
 package lib
 
+import "slices"
+
 type DiskPool struct {
 	global *Global
 	Name   string
@@ -7,6 +9,11 @@ type DiskPool struct {
 }
 
 func NewDiskPool(global *Global, name string, disks []string) *DiskPool {
+	for _, disk := range global.Disks {
+		if slices.Contains(disks, disk.Name) {
+			disk.Pool = name
+		}
+	}
 	return &DiskPool{
 		global: global,
 		Name:   name,

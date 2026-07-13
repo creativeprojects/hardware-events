@@ -108,5 +108,11 @@ func diskAttributes(disk *Disk) []attribute.KeyValue {
 		{Key: "name", Value: attribute.StringValue(disk.Name)},
 		{Key: "device", Value: attribute.StringValue(disk.Device)},
 	}
+	if disk.Pool != "" {
+		attributes = append(attributes, attribute.KeyValue{
+			Key:   "pool",
+			Value: attribute.StringValue(disk.Pool),
+		})
+	}
 	return attributes
 }

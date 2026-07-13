@@ -42,11 +42,6 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 		diskstatsMutex:     sync.Mutex{},
 	}
 
-	// Disk pools
-	for name, value := range config.DiskPools {
-		global.DiskPools[name] = NewDiskPool(global, name, value)
-	}
-
 	// Disk Power Status
 	for name, value := range config.DiskPowerStatus {
 		var diskStatus DiskStatuser
@@ -70,6 +65,11 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 			continue
 		}
 		global.Disks[name] = disk
+	}
+
+	// Disk pools
+	for name, value := range config.DiskPools {
+		global.DiskPools[name] = NewDiskPool(global, name, value)
 	}
 
 	// Templates
