@@ -55,8 +55,9 @@ func main() {
 		config.Simulation = true
 	}
 	if config.Simulation {
-		clog.Warningf("running in simulation mode with seed = %d", flags.seed)
-		config.Seed = flags.seed
+		clog.Warningf("running in simulation mode with seeds = %d and %d", flags.seed1, flags.seed2)
+		config.Seed1 = flags.seed1
+		config.Seed2 = flags.seed2
 	}
 
 	global, err := lib.NewGlobal(config)
