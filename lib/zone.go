@@ -117,3 +117,7 @@ func (z *Zone) RequestSpeed(name string, speed int, min, max bool) {
 	}
 	z.SetSpeed(speed)
 }
+
+func (z *Zone) CurrentSpeed() int {
+	return z.currentSpeed
+}

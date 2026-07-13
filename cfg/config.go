@@ -119,7 +119,8 @@ type Telemetry struct {
 }
 
 type Prometheus struct {
-	Listen string `yaml:"listen"`
+	Enabled bool   `yaml:"enabled"`
+	Listen  string `yaml:"listen_address"`
 }
 
 // LoadFileConfig loads the configuration from the file

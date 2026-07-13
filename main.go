@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/creativeprojects/clog"
 	"github.com/creativeprojects/hardware-events/cfg"
@@ -96,8 +98,25 @@ func main() {
 		global.FanControl.Start()
 	}
 
+	closeTelemetry, err := setupTelemetry(config, global)
+	if err != nil {
+		clog.Errorf("cannot start telemetry: %v", err)
+		exitCode = 1
+		return
+	}
+
+	closeMetricsServer, err := setupMetricsServer(config)
+	if err != nil {
+		clog.Errorf("cannot start http server: %v", err)
+		exitCode = 1
+		return
+	}
+
 	// wait until we're politely asked to leave
 	<-stop
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	closeMetricsServer(ctx)
+	closeTelemetry(ctx)
 	signal.Stop(stop)
 	_ = global.FanControl.Exit()
 	notifyLeaving()

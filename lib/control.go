@@ -112,7 +112,7 @@ func (c *Control) Exit() error {
 // Start the controller. The method will return after it has kicked off the necessary goroutines.
 func (c *Control) Start() {
 	for name, zone := range c.Zones {
-		clog.Debugf("starting %s", name)
+		clog.Debugf("starting zone: %s", name)
 		zone.Start()
 	}
 }
