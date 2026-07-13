@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"sync"
@@ -90,7 +90,7 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 		return global, err
 	}
 
-	simulationRand := rand.New(rand.NewSource(config.Seed))
+	simulationRand := rand.New(rand.NewPCG(config.Seed1, config.Seed2))
 
 	// Temperature sensors
 	for sensorName, sensorCfg := range config.Sensors {

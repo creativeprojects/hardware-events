@@ -180,3 +180,8 @@ schedule:
     when:
     - startup
     - every 5m
+
+telemetry:
+  prometheus:
+    enabled: true
+    listen_address: ":8080"

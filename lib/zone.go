@@ -63,7 +63,7 @@ func NewZone(sensorReader SensorReader, config cfg.FanZone, name string, setSpee
 
 	sensors := make(map[string]*TemperatureSensor, len(config.Sensors))
 	for sensorName, sensorCfg := range config.Sensors {
-		sensor, err := NewTemperatureSensor(sensorCfg, sensorName, timer, sensorReader(sensorName), zone.RequestSpeed)
+		sensor, err := NewTemperatureSensor(sensorCfg, sensorName, timer, sensorReader(sensorName), zone.RequestFanSpeed)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (z *Zone) Start() {
 	}
 }
 
-func (z *Zone) SetSpeed(speed int) {
+func (z *Zone) setFanSpeed(speed int) {
 	if speed < z.minSpeed {
 		speed = z.minSpeed
 	}
@@ -97,7 +97,7 @@ func (z *Zone) SetSpeed(speed int) {
 	}
 }
 
-func (z *Zone) RequestSpeed(name string, speed int, min, max bool) {
+func (z *Zone) RequestFanSpeed(name string, speed int, min, max bool) {
 	if min {
 		speed = z.minSpeed
 	} else if max {
@@ -115,5 +115,12 @@ func (z *Zone) RequestSpeed(name string, speed int, min, max bool) {
 			speed = bid
 		}
 	}
-	z.SetSpeed(speed)
+	z.setFanSpeed(speed)
+}
+
+func (z *Zone) CurrentFanSpeed() int {
+	z.mutex.Lock()
+	defer z.mutex.Unlock()
+
+	return z.currentSpeed
 }

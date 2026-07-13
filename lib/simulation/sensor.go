@@ -2,7 +2,7 @@ package simulation
 
 import (
 	"math"
-	"math/rand"
+	"math/rand/v2"
 	"strconv"
 	"sync"
 

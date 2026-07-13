@@ -11,7 +11,8 @@ import (
 // Config from the file
 type Config struct {
 	Simulation      bool                       `yaml:"simulation"`
-	Seed            int64                      `yaml:"simulation_seed"`
+	Seed1           uint64                     `yaml:"simulation_seed1"`
+	Seed2           uint64                     `yaml:"simulation_seed2"`
 	DiskPowerStatus map[string]DiskPowerStatus `yaml:"disk_power_status"`
 	Sensors         map[string]Task            `yaml:"sensors"`
 	DiskPools       map[string][]string        `yaml:"disk_pools"`
@@ -20,6 +21,7 @@ type Config struct {
 	Tasks           map[string]Task            `yaml:"tasks"`
 	Schedule        map[string]Schedule        `yaml:"schedule"`
 	FanControl      FanControl                 `yaml:"fan_control"`
+	Telemetry       Telemetry                  `yaml:"telemetry"`
 }
 
 type DiskPowerStatus struct {
@@ -110,6 +112,15 @@ type SetFromTo struct {
 	Set  int `yaml:"set"`
 	From int `yaml:"from"`
 	To   int `yaml:"to"`
+}
+
+type Telemetry struct {
+	Prometheus Prometheus `yaml:"prometheus"`
+}
+
+type Prometheus struct {
+	Enabled bool   `yaml:"enabled"`
+	Listen  string `yaml:"listen_address"`
 }
 
 // LoadFileConfig loads the configuration from the file
