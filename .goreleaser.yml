@@ -1,4 +1,5 @@
 project_name: hardware-events
+version: 2
 
 builds:
   - id: hardware-events_targz
@@ -21,15 +22,16 @@ builds:
 
 archives:
   - id: targz
-    builds:
-    - hardware-events_targz
-    format: tar.gz
+    ids:
+      - hardware-events_targz
+    formats:
+      - tar.gz
     
 checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 
 changelog:
   sort: asc
@@ -45,12 +47,6 @@ nfpms:
     homepage: "https://github.com/creativeprojects"
     maintainer: "fred@creativeprojects.tech"
     description: "Monitor Hardware Events"
-    replacements:
-      amd64: 64bit
-      386: 32bit
-      arm: ARM
-      arm64: ARM64
-      linux: Linux
     formats:
       - apk
       - deb
