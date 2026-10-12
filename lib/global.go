@@ -201,7 +201,7 @@ func (g *Global) StartTimers() {
 				clog.Debugf("running timer task %s", timer.task.Name)
 				err := timer.task.Execute()
 				if err != nil {
-					clog.Errorf("timer task %s failed: %w", timer.task.Name, err)
+					clog.Errorf("timer task %s failed: %s", timer.task.Name, err)
 				}
 			}
 		}(timer)

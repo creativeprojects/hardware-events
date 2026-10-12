@@ -179,7 +179,7 @@ disks:
 #     task: zabbix_sender
 #     when:
 #     - startup
-#     - every 15s
+#     - every 5m
 
 telemetry:
   prometheus:
