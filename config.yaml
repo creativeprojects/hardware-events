@@ -163,23 +163,23 @@ disks:
     last_active: 50m
     standby_after: 1h
 
-templates:
-  zabbix:
-    source: "zabbix_template.go.txt"
+# templates:
+#   zabbix:
+#     source: "zabbix_template.go.txt"
 
-tasks:
-  zabbix_sender:
-    command: "zabbix_sender -z 127.0.0.1 -s \"Zabbix server\" -i -"
-    timeout: 5s
-    stdin:
-      template: zabbix
+# tasks:
+#   zabbix_sender:
+#     command: "zabbix_sender -z 127.0.0.1 -s \"Zabbix server\" -i -"
+#     timeout: 5s
+#     stdin:
+#       template: zabbix
 
-schedule:
-  zabbix:
-    task: zabbix_sender
-    when:
-    - startup
-    - every 5m
+# schedule:
+#   zabbix:
+#     task: zabbix_sender
+#     when:
+#     - startup
+#     - every 15s
 
 telemetry:
   prometheus:
