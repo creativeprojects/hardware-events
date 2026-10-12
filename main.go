@@ -82,7 +82,7 @@ func main() {
 		clog.Debugf("running startup task %s", task.Name)
 		err := task.Execute()
 		if err != nil {
-			clog.Error(err)
+			clog.Errorf("startup task %s failed: %s", task.Name, err)
 			continue
 		}
 	}

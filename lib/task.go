@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"time"
 
@@ -50,6 +51,9 @@ func NewTask(global *Global, name string, config cfg.Task, simulate bool) (*Task
 func (t *Task) Execute() error {
 	var stdin io.Reader
 	if t.InputTemplate != "" {
+		if t.global.templ == nil || t.global.Templates[t.InputTemplate] == nil {
+			return fmt.Errorf("template %s not found", t.InputTemplate)
+		}
 		input := &bytes.Buffer{}
 		err := t.global.templ.ExecuteTemplate(input, t.global.Templates[t.InputTemplate].ID, t.global)
 		if err != nil {

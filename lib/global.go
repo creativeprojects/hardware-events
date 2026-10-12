@@ -84,10 +84,12 @@ func NewGlobal(config cfg.Config) (*Global, error) {
 		templates = append(templates, source)
 	}
 
-	// Now load the templates
-	global.templ, err = template.ParseFiles(templates...)
-	if err != nil {
-		return global, err
+	if len(templates) > 0 {
+		// Now load the templates
+		global.templ, err = template.ParseFiles(templates...)
+		if err != nil {
+			return global, err
+		}
 	}
 
 	simulationRand := rand.New(rand.NewPCG(config.Seed1, config.Seed2))
@@ -165,6 +167,10 @@ func (g *Global) GetStartupTasks() []*Task {
 	tasks := make([]*Task, 0, len(g.Schedules))
 	for _, schedule := range g.Schedules {
 		if schedule.OnStartup() {
+			if schedule.Task == nil {
+				clog.Error("startup task not found")
+				continue
+			}
 			tasks = append(tasks, schedule.Task)
 		}
 	}
@@ -176,6 +182,10 @@ func (g *Global) GetTimerTasks() []Timer {
 	for _, schedule := range g.Schedules {
 		duration := schedule.OnTimer()
 		if duration > 0 {
+			if schedule.Task == nil {
+				clog.Error("scheduled task not found")
+				continue
+			}
 			timers = append(timers, Timer{schedule.Task, duration})
 		}
 	}
@@ -191,7 +201,7 @@ func (g *Global) StartTimers() {
 				clog.Debugf("running timer task %s", timer.task.Name)
 				err := timer.task.Execute()
 				if err != nil {
-					clog.Error(err)
+					clog.Errorf("timer task %s failed: %s", timer.task.Name, err)
 				}
 			}
 		}(timer)
