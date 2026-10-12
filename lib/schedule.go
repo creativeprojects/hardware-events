@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -22,12 +23,7 @@ func NewSchedule(global *Global, config cfg.Schedule) *Schedule {
 }
 
 func (s *Schedule) OnStartup() bool {
-	for _, when := range s.When {
-		if when == "startup" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s.When, "startup")
 }
 
 func (s *Schedule) OnTimer() time.Duration {

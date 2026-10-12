@@ -163,8 +163,8 @@ func (s *Diskstats) findPartitions(diskname string) []string {
 		if key == diskname {
 			continue
 		}
-		if strings.HasPrefix(key, diskname) {
-			partitionID := strings.TrimPrefix(key, diskname)
+		if after, ok := strings.CutPrefix(key, diskname); ok {
+			partitionID := after
 			_, err := strconv.Atoi(partitionID)
 			if err != nil {
 				continue
